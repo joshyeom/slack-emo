@@ -4,3 +4,4 @@
 
 export * from "./theme-provider";
 export * from "./ui/sonner";
+export * from "./emoji";
