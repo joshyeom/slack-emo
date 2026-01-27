@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -11,7 +11,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   const { slug } = await params;
   const supabase = await createClient();
 
-  // 이모지 조회
+  if (!supabase) {
+    return NextResponse.json({ error: "Database not configured" }, { status: 500 });
+  }
+
+  // Get emoji
   const { data: emoji, error: emojiError } = await supabase
     .from("emojis")
     .select("id")
@@ -22,18 +26,18 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Emoji not found" }, { status: 404 });
   }
 
-  // 헤더에서 정보 추출
+  // Extract headers
   const headersList = await headers();
   const forwardedFor = headersList.get("x-forwarded-for");
   const ip = forwardedFor ? forwardedFor.split(",")[0].trim() : null;
   const userAgent = headersList.get("user-agent");
 
-  // 현재 사용자 조회
+  // Get current user
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 중복 클릭 체크 (같은 IP/유저가 1분 내 동일 이모지 클릭)
+  // Check duplicate clicks (same IP/user within 1 minute)
   const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
 
   let duplicateQuery = supabase
@@ -51,11 +55,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   const { data: existingClick } = await duplicateQuery.limit(1);
 
   if (existingClick && existingClick.length > 0) {
-    // 중복 클릭 - 기록하지 않지만 성공 응답
+    // Duplicate click - don't record but return success
     return NextResponse.json({ success: true, duplicate: true });
   }
 
-  // 클릭 기록
+  // Record click
   const { error: clickError } = await supabase.from("clicks").insert({
     emoji_id: emoji.id,
     user_id: user?.id || null,
