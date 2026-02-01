@@ -1,4 +1,5 @@
 import { Footer, Header } from "@/components/layout";
+import { SearchProvider } from "@/components/search-provider";
 
 export default function MainLayout({
   children,
@@ -6,10 +7,12 @@ export default function MainLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="bg-background flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1">{children}</main>
-      <Footer />
-    </div>
+    <SearchProvider>
+      <div className="bg-background flex min-h-screen flex-col">
+        <Header />
+        <main className="flex-1">{children}</main>
+        <Footer />
+      </div>
+    </SearchProvider>
   );
 }
