@@ -1,11 +1,10 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 import Image from "next/image";
 
 import debounce from "lodash.debounce";
-import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -13,12 +12,10 @@ import type { Emoji, PopularEmoji } from "@/types/database";
 
 type EmojiCardProps = {
   emoji: Emoji | PopularEmoji;
-  onDownload?: (emoji: Emoji | PopularEmoji) => Promise<void>;
+  onDownload?: (emoji: Emoji | PopularEmoji) => void;
 };
 
 export const EmojiCard = ({ emoji, onDownload }: EmojiCardProps) => {
-  const [isDownloading, setIsDownloading] = useState(false);
-
   // Debounced click tracking
   const trackClick = useMemo(
     () =>
@@ -36,54 +33,36 @@ export const EmojiCard = ({ emoji, onDownload }: EmojiCardProps) => {
     []
   );
 
-  const handleClick = useCallback(async () => {
-    if (isDownloading) return;
-
-    setIsDownloading(true);
-
+  const handleClick = useCallback(() => {
     // Track click (debounced)
     trackClick(emoji.slug);
 
-    try {
-      if (onDownload) {
-        await onDownload(emoji);
-      } else {
-        await downloadEmoji(emoji);
-      }
-    } catch (error) {
-      console.error("Download failed:", error);
-    } finally {
-      setIsDownloading(false);
+    if (onDownload) {
+      onDownload(emoji);
+    } else {
+      downloadEmoji(emoji);
     }
-  }, [emoji, isDownloading, onDownload, trackClick]);
+  }, [emoji, onDownload, trackClick]);
 
   return (
     <button
       onClick={handleClick}
-      disabled={isDownloading}
       className={cn(
         "group relative flex flex-col items-center justify-center",
         "rounded-lg p-3 transition-all",
         "hover:bg-muted",
-        "focus:ring-primary focus:ring-2 focus:ring-offset-2 focus:outline-none",
-        "disabled:cursor-not-allowed disabled:opacity-50"
+        "focus:ring-primary focus:ring-2 focus:ring-offset-2 focus:outline-none"
       )}
     >
       {/* Emoji Image */}
       <div className="relative h-12 w-12 sm:h-16 sm:w-16">
-        {isDownloading ? (
-          <div className="flex h-full w-full items-center justify-center">
-            <Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
-          </div>
-        ) : (
-          <Image
-            src={emoji.image_url}
-            alt={emoji.name}
-            fill
-            className="object-contain"
-            unoptimized={emoji.is_animated}
-          />
-        )}
+        <Image
+          src={emoji.image_url}
+          alt={emoji.name}
+          fill
+          className="object-contain"
+          unoptimized={emoji.is_animated}
+        />
       </div>
 
       {/* Emoji Name */}
