@@ -1,25 +1,16 @@
 "use client";
 
-import { useState } from "react";
-
 import { useTheme } from "next-themes";
 import Link from "next/link";
 
 import { Moon, Search, Sun } from "lucide-react";
 
+import { useSearchContext } from "@/components/search-provider";
 import { Button, Input } from "@/components/ui";
 
 export const Header = () => {
   const { theme, setTheme } = useTheme();
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      // TODO: Implement search filtering
-      console.log("Search:", searchQuery);
-    }
-  };
+  const { query, setQuery } = useSearchContext();
 
   return (
     <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur">
@@ -30,34 +21,34 @@ export const Header = () => {
         </Link>
 
         {/* Search - Desktop */}
-        <form onSubmit={handleSearch} className="mx-8 hidden max-w-md flex-1 md:flex">
+        <div className="mx-8 hidden max-w-md flex-1 md:block">
           <div className="relative w-full">
             <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               type="search"
               placeholder="Search emojis..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
               className="pl-10"
             />
           </div>
-        </form>
+        </div>
 
         {/* Actions */}
         <div className="flex items-center gap-2">
           {/* Mobile Search */}
-          <form onSubmit={handleSearch} className="flex-1 md:hidden">
+          <div className="flex-1 md:hidden">
             <div className="relative">
               <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
               <Input
                 type="search"
                 placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
                 className="w-40 pl-10"
               />
             </div>
-          </form>
+          </div>
 
           {/* Theme Toggle */}
           <Button

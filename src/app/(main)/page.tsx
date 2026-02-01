@@ -1,6 +1,6 @@
 import { getAllEmojis } from "@/lib/api/emojis";
 
-import { EmojiGrid } from "@/components/emoji";
+import { EmojiList } from "@/components/emoji";
 
 export default async function HomePage() {
   const emojis = await getAllEmojis(200);
@@ -8,7 +8,7 @@ export default async function HomePage() {
   return (
     <div className="container mx-auto max-w-6xl px-4 py-6">
       {emojis.length > 0 ? (
-        <EmojiGrid emojis={emojis} />
+        <EmojiList emojis={emojis} />
       ) : (
         <div className="py-20 text-center">
           <div className="mb-4 text-6xl">:)</div>
