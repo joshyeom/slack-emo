@@ -1,52 +1,23 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
-
 import Image from "next/image";
-
-import debounce from "lodash.debounce";
 
 import { cn } from "@/lib/utils";
 
 import type { Emoji, PopularEmoji } from "@/types/database";
 
+import { useEmojiDownload } from "@/hooks";
+
 type EmojiCardProps = {
   emoji: Emoji | PopularEmoji;
-  onDownload?: (emoji: Emoji | PopularEmoji) => void;
 };
 
-export const EmojiCard = ({ emoji, onDownload }: EmojiCardProps) => {
-  // Debounced click tracking
-  const trackClick = useMemo(
-    () =>
-      debounce(
-        async (emojiSlug: string) => {
-          try {
-            await fetch(`/api/emojis/${emojiSlug}/click`, { method: "POST" });
-          } catch (error) {
-            console.error("Failed to track click:", error);
-          }
-        },
-        2000,
-        { leading: true, trailing: false }
-      ),
-    []
-  );
-
-  const handleClick = useCallback(() => {
-    // Track click (debounced)
-    trackClick(emoji.slug);
-
-    if (onDownload) {
-      onDownload(emoji);
-    } else {
-      downloadEmoji(emoji);
-    }
-  }, [emoji, onDownload, trackClick]);
+export const EmojiCard = ({ emoji }: EmojiCardProps) => {
+  const { handleDownload } = useEmojiDownload(emoji);
 
   return (
     <button
-      onClick={handleClick}
+      onClick={handleDownload}
       className={cn(
         "group relative flex flex-col items-center justify-center",
         "rounded-lg p-3 transition-all",
@@ -71,17 +42,4 @@ export const EmojiCard = ({ emoji, onDownload }: EmojiCardProps) => {
       </span>
     </button>
   );
-};
-
-// Helper function to download emoji
-const downloadEmoji = async (emoji: Emoji | PopularEmoji) => {
-  const response = await fetch(emoji.image_url);
-  const blob = await response.blob();
-
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = `${emoji.slug}.${emoji.is_animated ? "gif" : "png"}`;
-  link.click();
-
-  URL.revokeObjectURL(link.href);
 };
