@@ -12,7 +12,7 @@ type EmojiGridProps = {
 
 export const EmojiGrid = ({ emojis, className, columns = "auto" }: EmojiGridProps) => {
   const gridCols = {
-    auto: "grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8",
+    auto: "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5",
     4: "grid-cols-4",
     5: "grid-cols-5",
     6: "grid-cols-6",
@@ -28,7 +28,7 @@ export const EmojiGrid = ({ emojis, className, columns = "auto" }: EmojiGridProp
   }
 
   return (
-    <div className={cn("grid gap-2 sm:gap-3", gridCols[columns], className)}>
+    <div className={cn("grid gap-2", gridCols[columns], className)}>
       {emojis.map((emoji) => (
         <EmojiCard key={emoji.id} emoji={emoji} />
       ))}
