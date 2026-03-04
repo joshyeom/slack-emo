@@ -2,6 +2,8 @@
 
 import { useCallback, useState } from "react";
 
+import { resizeImageFile } from "@/lib/resize-image";
+
 import { useUploadEmoji } from "./use-emojis";
 
 const ALLOWED_TYPES = ["image/png", "image/gif", "image/jpeg", "image/webp"];
@@ -19,12 +21,15 @@ export const useEmojiUploadForm = () => {
 
   const resetForm = useCallback(() => {
     setFile(null);
-    setPreview(null);
+    setPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
     setName("");
     setError(null);
   }, []);
 
-  const handleFileSelect = useCallback((selectedFile: File) => {
+  const handleFileSelect = useCallback(async (selectedFile: File) => {
     if (!ALLOWED_TYPES.includes(selectedFile.type)) {
       setError("PNG, GIF, JPEG, WebP 파일만 업로드 가능합니다");
       return;
@@ -36,13 +41,14 @@ export const useEmojiUploadForm = () => {
     }
 
     setError(null);
-    setFile(selectedFile);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreview(e.target?.result as string);
-    };
-    reader.readAsDataURL(selectedFile);
+    try {
+      const resized = await resizeImageFile(selectedFile);
+      setFile(resized);
+      setPreview(URL.createObjectURL(resized));
+    } catch {
+      setError("이미지 처리에 실패했습니다");
+    }
   }, []);
 
   const handleDrop = useCallback(
@@ -117,7 +123,10 @@ export const useEmojiUploadForm = () => {
 
   const clearPreview = useCallback(() => {
     setFile(null);
-    setPreview(null);
+    setPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
   }, []);
 
   return {
