@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import sharp from "sharp";
-
 import { createClient } from "@/lib/supabase/server";
 
 // Disable Next.js server-side caching - use TanStack Query for client caching
 export const dynamic = "force-dynamic";
 
-const EMOJI_SIZE = 128;
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB input limit
 
 // Generate ASCII-only slug for file paths (Supabase Storage doesn't allow non-ASCII)
@@ -15,34 +12,6 @@ const generateFileSlug = (): string => {
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 8);
   return `emoji-${timestamp}-${random}`;
-};
-
-// Resize image to 128x128 while maintaining aspect ratio
-const resizeImage = async (
-  buffer: Buffer,
-  isAnimated: boolean
-): Promise<{ data: Buffer; format: "png" | "gif" }> => {
-  if (isAnimated) {
-    // For GIFs, resize all frames
-    const resized = await sharp(buffer, { animated: true })
-      .resize(EMOJI_SIZE, EMOJI_SIZE, {
-        fit: "contain",
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      })
-      .gif()
-      .toBuffer();
-    return { data: resized, format: "gif" };
-  } else {
-    // For static images, convert to PNG
-    const resized = await sharp(buffer)
-      .resize(EMOJI_SIZE, EMOJI_SIZE, {
-        fit: "contain",
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      })
-      .png()
-      .toBuffer();
-    return { data: resized, format: "png" };
-  }
 };
 
 // GET /api/emojis - Fetch all approved emojis
@@ -111,22 +80,19 @@ export const POST = async (request: NextRequest) => {
       return NextResponse.json({ error: "File size must be less than 2MB" }, { status: 400 });
     }
 
-    // Resize image to 128x128
+    // Image is already resized on the client (128x128)
     const isAnimated = file.type === "image/gif";
-    const arrayBuffer = await file.arrayBuffer();
-    const inputBuffer = Buffer.from(arrayBuffer);
-
-    const { data: resizedBuffer, format } = await resizeImage(inputBuffer, isAnimated);
 
     // Generate unique slug for file storage (ASCII only)
+    const format = isAnimated ? "gif" : "png";
     const slug = generateFileSlug();
     const filePath = `${slug}.${format}`;
-    const contentType = format === "gif" ? "image/gif" : "image/png";
+    const contentType = file.type;
 
     // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage
       .from("emojis")
-      .upload(filePath, resizedBuffer, {
+      .upload(filePath, await file.arrayBuffer(), {
         contentType,
         upsert: false,
       });
