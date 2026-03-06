@@ -7,8 +7,8 @@
 -- 1. emojis 버킷 생성 (Dashboard에서 생성)
 -- - Name: emojis
 -- - Public: true
--- - File size limit: 524288 (500KB)
--- - Allowed MIME types: image/png, image/gif, image/webp
+-- - File size limit: Free Plan 기본 50MB (API에서 2MB 제한)
+-- - Allowed MIME types: image/png, image/gif, image/jpeg, image/webp
 
 -- 2. Storage RLS 정책
 -- ============================================

@@ -1,78 +1,69 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Homepage", () => {
-  test("should display the homepage with hero section", async ({ page }) => {
+  test("should display the header with logo and search", async ({ page }) => {
     await page.goto("/");
 
-    // Hero section should be visible
-    await expect(page.getByRole("heading", { name: /KoreanMojis/i })).toBeVisible();
+    // Logo should be visible in header
+    await expect(page.getByRole("banner").getByRole("link", { name: /slack-emo/i })).toBeVisible();
 
-    // Navigation should be present
-    await expect(page.getByRole("navigation")).toBeVisible();
+    // Search input should be visible (desktop)
+    await expect(page.getByPlaceholder("Search emojis...")).toBeVisible();
   });
 
-  test("should navigate to categories page", async ({ page }) => {
+  test("should display emoji grid or empty state", async ({ page }) => {
     await page.goto("/");
 
-    // Click on categories link
-    await page
-      .getByRole("link", { name: /카테고리/i })
+    // Either emoji grid or empty state should be visible
+    const emojiGrid = page.locator("button").filter({ has: page.locator("img") });
+    const emptyState = page.getByText(/No emojis/i);
+
+    const hasEmojis = await emojiGrid
       .first()
+      .isVisible()
+      .catch(() => false);
+    const hasEmptyState = await emptyState.isVisible().catch(() => false);
+
+    expect(hasEmojis || hasEmptyState).toBe(true);
+  });
+
+  test("should display login button when not authenticated", async ({ page }) => {
+    await page.goto("/");
+
+    await expect(page.getByRole("button", { name: /로그인/i })).toBeVisible();
+  });
+
+  test("should display theme toggle button", async ({ page }) => {
+    await page.goto("/");
+
+    await expect(page.getByRole("button", { name: /Toggle theme/i })).toBeVisible();
+  });
+
+  test("should filter emojis when searching", async ({ page }) => {
+    await page.goto("/");
+
+    const searchInput = page.getByPlaceholder("Search emojis...");
+    await searchInput.fill("test-query-that-matches-nothing-xyz");
+
+    // Should show no results message
+    await expect(page.getByText(/No emojis found/i)).toBeVisible({ timeout: 10000 });
+  });
+
+  test("should display footer", async ({ page }) => {
+    await page.goto("/");
+
+    await expect(page.getByText(/slack-emo/).last()).toBeVisible();
+    await expect(page.getByText(/2026/)).toBeVisible();
+  });
+
+  test("should navigate to home when clicking logo", async ({ page }) => {
+    await page.goto("/");
+
+    await page
+      .getByRole("banner")
+      .getByRole("link", { name: /slack-emo/i })
       .click();
 
-    // Should be on categories page
-    await expect(page).toHaveURL("/categories");
-  });
-
-  test("should navigate to popular emojis page", async ({ page }) => {
-    await page.goto("/");
-
-    // Click on popular link
-    await page.getByRole("link", { name: /인기/i }).first().click();
-
-    // Should be on popular page
-    await expect(page).toHaveURL("/emojis/popular");
-  });
-
-  test("should search for emojis", async ({ page }) => {
-    await page.goto("/");
-
-    // Find search input and type
-    const searchInput = page.getByPlaceholder(/검색/i);
-    await searchInput.fill("테스트");
-    await searchInput.press("Enter");
-
-    // Should navigate to search page with query
-    await expect(page).toHaveURL(/\/search\?q=테스트/);
-  });
-});
-
-test.describe("Categories Page", () => {
-  test("should display category list", async ({ page }) => {
-    await page.goto("/categories");
-
-    // Page title should be visible
-    await expect(page.getByRole("heading", { name: /카테고리/i })).toBeVisible();
-  });
-});
-
-test.describe("Popular Emojis Page", () => {
-  test("should display period tabs", async ({ page }) => {
-    await page.goto("/emojis/popular");
-
-    // Period tabs should be visible
-    await expect(page.getByRole("tab", { name: /이번 주/i })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /이번 달/i })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /전체/i })).toBeVisible();
-  });
-
-  test("should switch between period tabs", async ({ page }) => {
-    await page.goto("/emojis/popular");
-
-    // Click on month tab
-    await page.getByRole("tab", { name: /이번 달/i }).click();
-
-    // URL should update
-    await expect(page).toHaveURL(/period=month/);
+    await expect(page).toHaveURL("/");
   });
 });

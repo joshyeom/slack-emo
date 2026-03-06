@@ -362,6 +362,15 @@ export type Database = {
           created_at: string;
         }[];
       };
+      insert_click_if_not_duplicate: {
+        Args: {
+          p_emoji_id: string;
+          p_user_id?: string | null;
+          p_ip_address?: string | null;
+          p_user_agent?: string | null;
+        };
+        Returns: boolean;
+      };
     };
     Enums: {
       report_reason: "inappropriate" | "copyright" | "spam" | "other";

@@ -1,18 +1,24 @@
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
+import { apiError, withErrorHandler } from "@/lib/api/error";
+import { checkRateLimit } from "@/lib/api/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
 type RouteParams = {
   params: Promise<{ slug: string }>;
 };
 
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export const POST = withErrorHandler(async (_request: NextRequest, { params }: RouteParams) => {
+  // Rate limit: 1분에 60회
+  const rateLimited = checkRateLimit(_request, { maxRequests: 60 });
+  if (rateLimited) return rateLimited;
+
   const { slug } = await params;
   const supabase = await createClient();
 
   if (!supabase) {
-    return NextResponse.json({ error: "Database not configured" }, { status: 500 });
+    throw apiError("DB_ERROR", undefined, "Database not configured");
   }
 
   // Get emoji
@@ -23,7 +29,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     .single();
 
   if (emojiError || !emoji) {
-    return NextResponse.json({ error: "Emoji not found" }, { status: 404 });
+    throw apiError("NOT_FOUND", "이모지를 찾을 수 없습니다");
   }
 
   // Extract headers
@@ -37,40 +43,20 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Check duplicate clicks (same IP/user within 1 minute)
-  const oneMinuteAgo = new Date(Date.now() - 60 * 1000).toISOString();
-
-  let duplicateQuery = supabase
-    .from("clicks")
-    .select("id")
-    .eq("emoji_id", emoji.id)
-    .gte("created_at", oneMinuteAgo);
-
-  if (user) {
-    duplicateQuery = duplicateQuery.eq("user_id", user.id);
-  } else if (ip) {
-    duplicateQuery = duplicateQuery.eq("ip_address", ip);
-  }
-
-  const { data: existingClick } = await duplicateQuery.limit(1);
-
-  if (existingClick && existingClick.length > 0) {
-    // Duplicate click - don't record but return success
-    return NextResponse.json({ success: true, duplicate: true });
-  }
-
-  // Record click
-  const { error: clickError } = await supabase.from("clicks").insert({
-    emoji_id: emoji.id,
-    user_id: user?.id || null,
-    ip_address: ip,
-    user_agent: userAgent,
-  });
+  // RPC로 중복 체크 + 삽입을 DB 수준에서 처리 (SECURITY DEFINER로 RLS 우회)
+  const { data: inserted, error: clickError } = await supabase.rpc(
+    "insert_click_if_not_duplicate",
+    {
+      p_emoji_id: emoji.id,
+      p_user_id: user?.id || null,
+      p_ip_address: ip,
+      p_user_agent: userAgent,
+    }
+  );
 
   if (clickError) {
-    console.error("Failed to record click:", clickError);
-    return NextResponse.json({ error: "Failed to record click" }, { status: 500 });
+    throw apiError("DB_ERROR", undefined, `Click record failed: ${clickError.message}`);
   }
 
-  return NextResponse.json({ success: true });
-}
+  return NextResponse.json({ success: true, duplicate: !inserted });
+});

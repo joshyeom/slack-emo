@@ -11,15 +11,34 @@ const notoSansKR = Noto_Sans_KR({
   variable: "--font-noto-sans-kr",
 });
 
-// TODO: 앱 메타데이터를 수정하세요
 export const metadata: Metadata = {
-  title: "My App",
-  description: "앱 설명을 입력하세요",
+  title: {
+    default: "slack-emo — 슬랙 커스텀 이모지 디렉토리",
+    template: "%s | slack-emo",
+  },
+  description:
+    "슬랙에서 사용할 수 있는 커스텀 이모지를 검색하고 다운로드하세요. 누구나 이모지를 업로드하고 공유할 수 있습니다.",
   manifest: "/manifest.json",
+  openGraph: {
+    title: "slack-emo — 슬랙 커스텀 이모지 디렉토리",
+    description: "슬랙에서 사용할 수 있는 커스텀 이모지를 검색하고 다운로드하세요.",
+    type: "website",
+    locale: "ko_KR",
+    siteName: "slack-emo",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "slack-emo — 슬랙 커스텀 이모지 디렉토리",
+    description: "슬랙에서 사용할 수 있는 커스텀 이모지를 검색하고 다운로드하세요.",
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/icon-192.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "My App",
+    title: "slack-emo",
   },
 };
 

@@ -1,36 +1,32 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { EmojiGrid } from "../EmojiGrid";
 
+vi.mock("@/hooks", () => ({
+  useEmojiDownload: () => ({
+    handleDownload: vi.fn(),
+  }),
+}));
+
+const createMockEmoji = (id: string, name: string, slug: string) => ({
+  id,
+  slug,
+  name,
+  image_url: `https://example.com/${slug}.png`,
+  image_path: `${slug}.png`,
+  category_id: null,
+  uploader_id: null,
+  is_animated: false,
+  is_approved: true,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+});
+
 describe("EmojiGrid", () => {
   const mockEmojis = [
-    {
-      id: "1",
-      slug: "emoji-1",
-      name: "이모지 1",
-      image_url: "https://example.com/1.png",
-      original_url: "https://example.com/1.png",
-      category_id: "1",
-      is_animated: false,
-      is_approved: true,
-      is_hidden: false,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: "2",
-      slug: "emoji-2",
-      name: "이모지 2",
-      image_url: "https://example.com/2.png",
-      original_url: "https://example.com/2.png",
-      category_id: "1",
-      is_animated: true,
-      is_approved: true,
-      is_hidden: false,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
+    createMockEmoji("1", "이모지 1", "emoji-1"),
+    createMockEmoji("2", "이모지 2", "emoji-2"),
   ];
 
   it("renders all emojis", () => {
@@ -43,15 +39,7 @@ describe("EmojiGrid", () => {
   it("shows empty message when no emojis", () => {
     render(<EmojiGrid emojis={[]} />);
 
-    expect(screen.getByText("이모지가 없습니다.")).toBeInTheDocument();
-  });
-
-  it("passes showClickCount to EmojiCard", () => {
-    const popularEmojis = mockEmojis.map((e) => ({ ...e, click_count: 100 }));
-    render(<EmojiGrid emojis={popularEmojis} showClickCount />);
-
-    // Click count should be visible (100 displayed as is)
-    expect(screen.getAllByText("100")).toHaveLength(2);
+    expect(screen.getByText("No emojis found")).toBeInTheDocument();
   });
 
   it("applies custom className", () => {
@@ -69,7 +57,7 @@ describe("EmojiGrid", () => {
   it("uses auto grid columns by default", () => {
     const { container } = render(<EmojiGrid emojis={mockEmojis} />);
 
-    expect(container.firstChild).toHaveClass("grid-cols-4");
-    expect(container.firstChild).toHaveClass("sm:grid-cols-5");
+    expect(container.firstChild).toHaveClass("lg:grid-cols-4");
+    expect(container.firstChild).toHaveClass("xl:grid-cols-5");
   });
 });
