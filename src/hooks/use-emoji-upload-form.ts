@@ -14,6 +14,7 @@ export const useEmojiUploadForm = () => {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [name, setName] = useState("");
+  const [category, setCategory] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -26,6 +27,7 @@ export const useEmojiUploadForm = () => {
       return null;
     });
     setName("");
+    setCategory("");
     setError(null);
   }, []);
 
@@ -96,7 +98,7 @@ export const useEmojiUploadForm = () => {
       setError(null);
 
       uploadMutation.mutate(
-        { file, name: name.trim() },
+        { file, name: name.trim(), category: category.trim() || undefined },
         {
           onSuccess: () => {
             resetForm();
@@ -108,7 +110,7 @@ export const useEmojiUploadForm = () => {
         }
       );
     },
-    [file, name, uploadMutation, resetForm]
+    [file, name, category, uploadMutation, resetForm]
   );
 
   const handleOpenChange = useCallback(
@@ -134,10 +136,12 @@ export const useEmojiUploadForm = () => {
     file,
     preview,
     name,
+    category,
     error,
     isDragging,
     isLoading: uploadMutation.isPending,
     setName,
+    setCategory,
     handleFileChange,
     handleDrop,
     handleDragOver,
