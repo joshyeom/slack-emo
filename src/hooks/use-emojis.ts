@@ -17,12 +17,14 @@ const fetchEmojis = async (): Promise<Emoji[]> => {
 type UploadEmojiParams = {
   file: File;
   name: string;
+  category?: string;
 };
 
-const uploadEmoji = async ({ file, name }: UploadEmojiParams): Promise<Emoji> => {
+const uploadEmoji = async ({ file, name, category }: UploadEmojiParams): Promise<Emoji> => {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("name", name);
+  if (category) formData.append("category", category);
 
   const response = await fetch("/api/emojis", {
     method: "POST",
@@ -52,8 +54,9 @@ export const useUploadEmoji = () => {
   return useMutation({
     mutationFn: uploadEmoji,
     onSuccess: () => {
-      // Invalidate and refetch emojis list
       queryClient.invalidateQueries({ queryKey: EMOJIS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
     },
   });
 };

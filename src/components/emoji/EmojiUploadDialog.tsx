@@ -17,16 +17,20 @@ import {
 
 import { useEmojiUploadForm } from "@/hooks";
 
+import { CategoryInput } from "./CategoryInput";
+
 export const EmojiUploadDialog = () => {
   const {
     open,
     file,
     preview,
     name,
+    category,
     error,
     isDragging,
     isLoading,
     setName,
+    setCategory,
     handleFileChange,
     handleDrop,
     handleDragOver,
@@ -114,6 +118,12 @@ export const EmojiUploadDialog = () => {
               onChange={(e) => setName(e.target.value)}
               disabled={isLoading}
             />
+          </div>
+
+          {/* Category Input */}
+          <div className="space-y-2">
+            <Label>카테고리</Label>
+            <CategoryInput value={category} onChange={setCategory} disabled={isLoading} />
           </div>
 
           {/* Error Message */}

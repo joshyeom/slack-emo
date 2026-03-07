@@ -65,6 +65,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   const formData = await request.formData();
   const file = formData.get("file") as File | null;
   const name = formData.get("name") as string | null;
+  const categoryName = (formData.get("category") as string | null)?.trim() || null;
 
   if (!file || !name) {
     throw apiError("BAD_REQUEST", "이미지와 이름은 필수입니다");
@@ -108,6 +109,41 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     data: { publicUrl },
   } = supabase.storage.from("emojis").getPublicUrl(filePath);
 
+  // Resolve category (find existing or create new)
+  let categoryId: string | null = null;
+  if (categoryName) {
+    // Try to find existing category first
+    const { data: existing } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("name", categoryName)
+      .single();
+
+    if (existing) {
+      categoryId = existing.id;
+    } else {
+      // Try to create - may fail due to RLS or race condition, which is acceptable
+      const categorySlug = generateFileSlug();
+      const { data: created } = await supabase
+        .from("categories")
+        .insert({ name: categoryName, slug: categorySlug })
+        .select("id")
+        .single();
+
+      if (created) {
+        categoryId = created.id;
+      } else {
+        // Race condition: another request created it, try to find again
+        const { data: retry } = await supabase
+          .from("categories")
+          .select("id")
+          .eq("name", categoryName)
+          .single();
+        if (retry) categoryId = retry.id;
+      }
+    }
+  }
+
   // Insert emoji record
   const { data: emoji, error: insertError } = await supabase
     .from("emojis")
@@ -119,6 +155,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       is_animated: isAnimated,
       is_approved: true,
       uploader_id: user.id,
+      category_id: categoryId,
     })
     .select()
     .single();
