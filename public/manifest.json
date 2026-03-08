@@ -1,7 +1,7 @@
 {
-  "name": "slack-emo",
-  "short_name": "slack-emo",
-  "description": "슬랙 커스텀 이모지 디렉토리",
+  "name": "Slack Emo",
+  "short_name": "Slack Emo",
+  "description": "Slack Emo",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

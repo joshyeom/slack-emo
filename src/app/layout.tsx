@@ -13,23 +13,19 @@ const notoSansKR = Noto_Sans_KR({
 
 export const metadata: Metadata = {
   title: {
-    default: "Slack Emo — 슬랙 커스텀 이모지 디렉토리",
+    default: "Slack Emo",
     template: "%s | Slack Emo",
   },
-  description:
-    "슬랙에서 사용할 수 있는 커스텀 이모지를 검색하고 다운로드하세요. 누구나 이모지를 업로드하고 공유할 수 있습니다.",
   manifest: "/manifest.json",
   openGraph: {
-    title: "Slack Emo — 슬랙 커스텀 이모지 디렉토리",
-    description: "슬랙에서 사용할 수 있는 커스텀 이모지를 검색하고 다운로드하세요.",
+    title: "Slack Emo",
     type: "website",
     locale: "ko_KR",
     siteName: "Slack Emo",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Slack Emo — 슬랙 커스텀 이모지 디렉토리",
-    description: "슬랙에서 사용할 수 있는 커스텀 이모지를 검색하고 다운로드하세요.",
+    title: "Slack Emo",
   },
   icons: {
     icon: "/favicon.ico",

@@ -5,7 +5,7 @@ test.describe("Homepage", () => {
     await page.goto("/");
 
     // Logo should be visible in header
-    await expect(page.getByRole("banner").getByRole("link", { name: /slack-emo/i })).toBeVisible();
+    await expect(page.getByRole("banner").getByRole("link", { name: /Slack Emo/i })).toBeVisible();
 
     // Search input should be visible (desktop)
     await expect(page.getByPlaceholder("Search emojis...")).toBeVisible();
@@ -52,7 +52,7 @@ test.describe("Homepage", () => {
   test("should display footer", async ({ page }) => {
     await page.goto("/");
 
-    await expect(page.getByText(/slack-emo/).last()).toBeVisible();
+    await expect(page.getByText(/Slack Emo/).last()).toBeVisible();
     await expect(page.getByText(/2026/)).toBeVisible();
   });
 
@@ -61,7 +61,7 @@ test.describe("Homepage", () => {
 
     await page
       .getByRole("banner")
-      .getByRole("link", { name: /slack-emo/i })
+      .getByRole("link", { name: /Slack Emo/i })
       .click();
 
     await expect(page).toHaveURL("/");

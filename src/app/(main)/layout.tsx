@@ -1,4 +1,4 @@
-import { Footer, Header } from "@/components/layout";
+import { Header } from "@/components/layout";
 import { SearchProvider } from "@/components/search-provider";
 
 export default function MainLayout({
@@ -11,7 +11,6 @@ export default function MainLayout({
       <div className="bg-background flex min-h-screen flex-col">
         <Header />
         <main className="flex-1">{children}</main>
-        <Footer />
       </div>
     </SearchProvider>
   );
