@@ -20,6 +20,22 @@ export const validateEmojiName = (name: string): string | null => {
   return null;
 };
 
+const CATEGORY_NAME_MAX_LENGTH = 30;
+
+export const validateCategoryName = (category: string): string | null => {
+  const trimmed = category.trim().normalize("NFC");
+
+  if (!trimmed) {
+    return "카테고리를 입력해주세요";
+  }
+
+  if (trimmed.length > CATEGORY_NAME_MAX_LENGTH) {
+    return `카테고리는 ${CATEGORY_NAME_MAX_LENGTH}자 이하여야 합니다`;
+  }
+
+  return null;
+};
+
 const ALLOWED_MIME_TYPES = ["image/png", "image/gif", "image/jpeg", "image/webp"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { apiError, withErrorHandler } from "@/lib/api/error";
 import { checkRateLimit } from "@/lib/api/rate-limit";
-import { validateEmojiFile, validateEmojiName } from "@/lib/api/validation";
+import { validateCategoryName, validateEmojiFile, validateEmojiName } from "@/lib/api/validation";
 import { createClient } from "@/lib/supabase/server";
 
 // Disable Next.js server-side caching - use TanStack Query for client caching
@@ -81,6 +81,15 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   const nameError = validateEmojiName(name);
   if (nameError) {
     throw apiError("VALIDATION_ERROR", nameError);
+  }
+
+  // Validate category (required)
+  if (!categoryName) {
+    throw apiError("VALIDATION_ERROR", "카테고리를 입력해주세요");
+  }
+  const categoryError = validateCategoryName(categoryName);
+  if (categoryError) {
+    throw apiError("VALIDATION_ERROR", categoryError);
   }
 
   // Image is already resized on the client (128x128)
