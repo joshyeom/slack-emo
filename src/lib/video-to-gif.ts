@@ -49,8 +49,9 @@ const getFFmpeg = async (onProgress?: (progress: number) => void): Promise<any> 
   const origin = window.location.origin;
 
   // public/ffmpeg/ 에서 로컬 ESM 로드 (같은 origin이라 Worker CORS 문제 없음)
-  // @ts-expect-error local ESM import
-  const { FFmpeg } = await import(/* webpackIgnore: true */ `${origin}/ffmpeg/ffmpeg/index.js`);
+  const ffmpegUrl = `${origin}/ffmpeg/ffmpeg/index.js`;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { FFmpeg } = (await import(/* webpackIgnore: true */ ffmpegUrl)) as any;
   const ffmpeg = new FFmpeg();
 
   ffmpeg.on("log", ({ message }: { message: string }) => {
@@ -89,8 +90,9 @@ export const convertVideoToGif = async (file: File, options?: ConvertOptions): P
   const ffmpeg = await getFFmpeg(options?.onProgress);
 
   const origin = window.location.origin;
-  // @ts-expect-error local ESM import
-  const { fetchFile } = await import(/* webpackIgnore: true */ `${origin}/ffmpeg/util/index.js`);
+  const utilUrl = `${origin}/ffmpeg/util/index.js`;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { fetchFile } = (await import(/* webpackIgnore: true */ utilUrl)) as any;
 
   const inputName = "input" + getExtension(file.type);
   await ffmpeg.writeFile(inputName, await fetchFile(file));
