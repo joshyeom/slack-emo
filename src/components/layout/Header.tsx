@@ -29,7 +29,7 @@ export const Header = () => {
       <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <span className="text-xl font-bold">slack-emo</span>
+          <span className="text-xl font-bold">Slack Emo</span>
         </Link>
 
         {/* Search - Desktop */}
