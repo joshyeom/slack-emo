@@ -12,7 +12,7 @@ const downloadEmoji = async (emoji: Emoji | PopularEmoji) => {
 
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = `${emoji.slug}.${emoji.is_animated ? "gif" : "png"}`;
+  link.download = `${emoji.name}.${emoji.is_animated ? "gif" : "png"}`;
   link.click();
 
   URL.revokeObjectURL(link.href);
