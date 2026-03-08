@@ -21,7 +21,7 @@ export const validateEmojiName = (name: string): string | null => {
 };
 
 const ALLOWED_MIME_TYPES = ["image/png", "image/gif", "image/jpeg", "image/webp"];
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export const validateEmojiFile = (file: File): string | null => {
   if (!ALLOWED_MIME_TYPES.includes(file.type)) {
@@ -29,7 +29,7 @@ export const validateEmojiFile = (file: File): string | null => {
   }
 
   if (file.size > MAX_FILE_SIZE) {
-    return "파일 크기는 2MB 이하여야 합니다";
+    return "파일 크기는 5MB 이하여야 합니다";
   }
 
   return null;
