@@ -19,7 +19,7 @@ import type { Emoji, PopularEmoji } from "@/types/database";
 
 import { EmojiGrid } from "./EmojiGrid";
 
-const MAX_DASHBOARD_ITEMS = 12;
+const MAX_DASHBOARD_ITEMS = 15;
 
 // Section wrapper with optional "더 보기" link
 const Section = ({
@@ -134,7 +134,7 @@ export const EmojiDashboard = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-20">
       {/* Popular */}
       {popularSliced.length > 0 && (
         <Section title="인기 이모지" moreHref={showMorePopular ? "/category/popular" : undefined}>
