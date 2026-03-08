@@ -11,7 +11,7 @@ import { convertVideoToGif, isVideoFile, validateVideoFile } from "@/lib/video-t
 import { useUploadEmoji } from "./use-emojis";
 
 const ALLOWED_IMAGE_TYPES = ["image/png", "image/gif", "image/jpeg", "image/webp"];
-const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 export const useEmojiUploadForm = () => {
   const [open, setOpen] = useState(false);
@@ -52,7 +52,7 @@ export const useEmojiUploadForm = () => {
       }
 
       if (selectedFile.size > MAX_IMAGE_SIZE) {
-        toast.error("이미지 크기는 2MB 이하여야 합니다");
+        toast.error("이미지 크기는 5MB 이하여야 합니다");
         return;
       }
 

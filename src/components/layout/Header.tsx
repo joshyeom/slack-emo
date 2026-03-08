@@ -29,6 +29,9 @@ export const Header = () => {
       <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
+          <div className="relative h-7 w-10">
+            <Image src="/icon.png" alt="Slack Emo" fill className="object-contain" />
+          </div>
           <span className="text-xl font-bold">Slack Emo</span>
         </Link>
 
