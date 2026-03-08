@@ -156,8 +156,8 @@ export const useEmojiUploadForm = () => {
     async (e: React.FormEvent) => {
       e.preventDefault();
 
-      if (!file || !name.trim()) {
-        toast.error("이미지와 이름을 입력해주세요");
+      if (!file || !name.trim() || !category.trim()) {
+        toast.error("이미지, 이름, 카테고리를 모두 입력해주세요");
         return;
       }
 

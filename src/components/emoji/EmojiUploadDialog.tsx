@@ -148,7 +148,7 @@ export const EmojiUploadDialog = () => {
             >
               취소
             </Button>
-            <Button type="submit" disabled={isBusy || !file || !name.trim()}>
+            <Button type="submit" disabled={isBusy || !file || !name.trim() || !category.trim()}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
