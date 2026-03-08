@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_KR } from "next/font/google";
 
+import { Analytics } from "@vercel/analytics/react";
+
 import { QueryProvider, ThemeProvider, Toaster } from "@/components";
 
 import "./globals.css";
@@ -63,6 +65,7 @@ export default function RootLayout({
           >
             {children}
             <Toaster position="top-center" richColors />
+            <Analytics />
           </ThemeProvider>
         </QueryProvider>
       </body>
