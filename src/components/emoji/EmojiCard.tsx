@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useSyncExternalStore } from "react";
 
 import Image from "next/image";
 
@@ -14,29 +14,41 @@ type EmojiCardProps = {
   emoji: Emoji | PopularEmoji;
 };
 
-const TOOLTIP_HEIGHT = 160; // approximate tooltip height (image 96px + padding + text)
+const TOOLTIP_HEIGHT = 160;
+
+const getIsTouchDevice = () => "ontouchstart" in window || navigator.maxTouchPoints > 0;
+const subscribeToNothing = () => () => {};
+const useIsTouchDevice = () =>
+  useSyncExternalStore(subscribeToNothing, getIsTouchDevice, () => false);
 
 export const EmojiCard = ({ emoji }: EmojiCardProps) => {
   const { handleDownload } = useEmojiDownload(emoji);
   const [hovered, setHovered] = useState(false);
   const [direction, setDirection] = useState<"top" | "bottom">("bottom");
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const isTouch = useIsTouchDevice();
 
   const handleMouseEnter = useCallback(() => {
+    if (isTouch) return;
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       const spaceBelow = window.innerHeight - rect.bottom;
       setDirection(spaceBelow < TOOLTIP_HEIGHT ? "top" : "bottom");
     }
     setHovered(true);
-  }, []);
+  }, [isTouch]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (isTouch) return;
+    setHovered(false);
+  }, [isTouch]);
 
   return (
     <button
       ref={buttonRef}
       onClick={handleDownload}
       onMouseEnter={handleMouseEnter}
-      onMouseLeave={() => setHovered(false)}
+      onMouseLeave={handleMouseLeave}
       className={cn(
         "group relative flex cursor-pointer items-center gap-3",
         "border-border rounded-md border px-3 py-2.5 transition-all",
@@ -55,8 +67,8 @@ export const EmojiCard = ({ emoji }: EmojiCardProps) => {
       </div>
       <span className="truncate text-sm">:{emoji.name}</span>
 
-      {/* Hover tooltip - direction based on viewport position */}
-      {hovered && (
+      {/* Hover tooltip - desktop only */}
+      {hovered && !isTouch && (
         <div
           className={cn(
             "pointer-events-none absolute left-1/2 z-50 -translate-x-1/2",
