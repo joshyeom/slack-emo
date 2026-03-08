@@ -1,7 +1,5 @@
 "use client";
 
-import Image from "next/image";
-
 import { Loader2, Plus, Upload, X } from "lucide-react";
 
 import { Button, Input, Label } from "@/components/ui";
@@ -26,9 +24,10 @@ export const EmojiUploadDialog = () => {
     preview,
     name,
     category,
-    error,
     isDragging,
     isLoading,
+    isConverting,
+    convertProgress,
     setName,
     setCategory,
     handleFileChange,
@@ -39,6 +38,8 @@ export const EmojiUploadDialog = () => {
     handleOpenChange,
     clearPreview,
   } = useEmojiUploadForm();
+
+  const isBusy = isLoading || isConverting;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -57,7 +58,7 @@ export const EmojiUploadDialog = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Image Upload Area */}
           <div className="space-y-2">
-            <Label>이미지</Label>
+            <Label>이미지 / 동영상</Label>
             <div
               onDrop={handleDrop}
               onDragOver={handleDragOver}
@@ -70,15 +71,30 @@ export const EmojiUploadDialog = () => {
             >
               <input
                 type="file"
-                accept="image/png,image/gif,image/jpeg,image/webp"
+                accept="image/png,image/gif,image/jpeg,image/webp,video/mp4,video/quicktime,video/webm"
                 onChange={handleFileChange}
                 className="absolute inset-0 cursor-pointer opacity-0"
+                disabled={isBusy}
               />
 
-              {preview ? (
+              {isConverting ? (
+                <div className="flex flex-col items-center gap-3 p-4">
+                  <Loader2 className="text-primary h-8 w-8 animate-spin" />
+                  <span className="text-muted-foreground text-sm">
+                    GIF 변환 중... {convertProgress}%
+                  </span>
+                  <div className="bg-muted h-2 w-48 overflow-hidden rounded-full">
+                    <div
+                      className="bg-primary h-full transition-all duration-300"
+                      style={{ width: `${convertProgress}%` }}
+                    />
+                  </div>
+                </div>
+              ) : preview ? (
                 <div className="relative flex flex-col items-center gap-2 p-4">
                   <div className="relative h-16 w-16">
-                    <Image src={preview} alt="Preview" fill className="object-contain" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={preview} alt="Preview" className="h-full w-full object-contain" />
                   </div>
                   <span className="text-muted-foreground text-xs">{file?.name}</span>
                   <Button
@@ -98,10 +114,7 @@ export const EmojiUploadDialog = () => {
                 <div className="flex flex-col items-center gap-2 p-4">
                   <Upload className="text-muted-foreground h-8 w-8" />
                   <span className="text-muted-foreground text-sm">
-                    클릭하거나 드래그하여 업로드
-                  </span>
-                  <span className="text-muted-foreground text-xs">
-                    PNG, GIF, JPEG, WebP (최대 2MB, 128x128 리사이징)
+                    이미지, 혹은 영상을 업로드 해주세요
                   </span>
                 </div>
               )}
@@ -116,29 +129,26 @@ export const EmojiUploadDialog = () => {
               placeholder="이모지 이름 (예: party-parrot)"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              disabled={isLoading}
+              disabled={isBusy}
             />
           </div>
 
           {/* Category Input */}
           <div className="space-y-2">
             <Label>카테고리</Label>
-            <CategoryInput value={category} onChange={setCategory} disabled={isLoading} />
+            <CategoryInput value={category} onChange={setCategory} disabled={isBusy} />
           </div>
-
-          {/* Error Message */}
-          {error && <p className="text-sm text-red-500">{error}</p>}
 
           <DialogFooter>
             <Button
               type="button"
               variant="outline"
               onClick={() => handleOpenChange(false)}
-              disabled={isLoading}
+              disabled={isBusy}
             >
               취소
             </Button>
-            <Button type="submit" disabled={isLoading || !file || !name.trim()}>
+            <Button type="submit" disabled={isBusy || !file || !name.trim()}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

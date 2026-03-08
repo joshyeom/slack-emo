@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 
-import { Loader2 } from "lucide-react";
+import Link from "next/link";
+
+import { ChevronRight, Loader2 } from "lucide-react";
 
 import { useSearchContext } from "@/components/search-provider";
 
@@ -17,77 +19,55 @@ import type { Emoji, PopularEmoji } from "@/types/database";
 
 import { EmojiGrid } from "./EmojiGrid";
 
-// Infinite scroll observer hook
-const useInfiniteScroll = (
-  fetchNextPage: () => void,
-  hasNextPage: boolean | undefined,
-  isFetchingNextPage: boolean
-) => {
-  const observerRef = useRef<HTMLDivElement>(null);
-  const stateRef = useRef({ hasNextPage, isFetchingNextPage });
+const MAX_DASHBOARD_ITEMS = 12;
 
-  useEffect(() => {
-    stateRef.current = { hasNextPage, isFetchingNextPage };
-  }, [hasNextPage, isFetchingNextPage]);
-
-  useEffect(() => {
-    const el = observerRef.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (
-          entries[0].isIntersecting &&
-          stateRef.current.hasNextPage &&
-          !stateRef.current.isFetchingNextPage
-        ) {
-          fetchNextPage();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [fetchNextPage]);
-
-  return observerRef;
-};
-
-// Section wrapper
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+// Section wrapper with optional "더 보기" link
+const Section = ({
+  title,
+  moreHref,
+  children,
+}: {
+  title: string;
+  moreHref?: string;
+  children: React.ReactNode;
+}) => (
   <section className="space-y-3">
-    <h2 className="text-lg font-semibold">{title}</h2>
+    <h2 className="text-center text-lg font-semibold">{title}</h2>
     {children}
+    {moreHref && (
+      <div className="flex justify-center">
+        <Link
+          href={moreHref}
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm transition-colors"
+        >
+          더 보기 <ChevronRight className="h-4 w-4" />
+        </Link>
+      </div>
+    )}
   </section>
 );
 
-const LoadMoreIndicator = ({
-  isFetching,
-  observerRef,
-}: {
-  isFetching: boolean;
-  observerRef: React.RefObject<HTMLDivElement | null>;
-}) => (
-  <div ref={observerRef} className="flex justify-center py-4">
-    {isFetching && <Loader2 className="text-muted-foreground h-5 w-5 animate-spin" />}
-  </div>
-);
-
 // Category section with its own infinite query
-const CategorySection = ({ categoryId, name }: { categoryId: string; name: string }) => {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useCategoryEmojis(categoryId);
+const CategorySection = ({
+  categoryId,
+  name,
+  slug,
+}: {
+  categoryId: string;
+  name: string;
+  slug: string;
+}) => {
+  const { data, hasNextPage } = useCategoryEmojis(categoryId);
 
-  const observerRef = useInfiniteScroll(fetchNextPage, hasNextPage, isFetchingNextPage);
-
-  const emojis = data?.pages.flatMap((p) => p.emojis) || [];
+  const allEmojis = data?.pages.flatMap((p) => p.emojis) ?? [];
+  const emojis = allEmojis.slice(0, MAX_DASHBOARD_ITEMS);
+  const showMore = allEmojis.length > MAX_DASHBOARD_ITEMS || hasNextPage;
 
   if (emojis.length === 0) return null;
 
   return (
-    <Section title={name}>
+    <Section title={name} moreHref={showMore ? `/category/${slug}` : undefined}>
       <EmojiGrid emojis={emojis} />
-      <LoadMoreIndicator isFetching={isFetchingNextPage} observerRef={observerRef} />
     </Section>
   );
 };
@@ -123,16 +103,11 @@ export const EmojiDashboard = () => {
     [recent.data]
   );
 
-  const popularObserver = useInfiniteScroll(
-    popular.fetchNextPage,
-    popular.hasNextPage,
-    popular.isFetchingNextPage
-  );
-  const recentObserver = useInfiniteScroll(
-    recent.fetchNextPage,
-    recent.hasNextPage,
-    recent.isFetchingNextPage
-  );
+  const popularSliced = popularEmojis.slice(0, MAX_DASHBOARD_ITEMS);
+  const recentSliced = recentEmojis.slice(0, MAX_DASHBOARD_ITEMS);
+
+  const showMorePopular = popularEmojis.length > MAX_DASHBOARD_ITEMS || popular.hasNextPage;
+  const showMoreRecent = recentEmojis.length > MAX_DASHBOARD_ITEMS || recent.hasNextPage;
 
   const uniqueEmojis = useMemo(() => {
     const seen = new Set<string>();
@@ -161,27 +136,22 @@ export const EmojiDashboard = () => {
   return (
     <div className="space-y-8">
       {/* Popular */}
-      {popularEmojis.length > 0 && (
-        <Section title="인기 이모지">
-          <EmojiGrid emojis={popularEmojis} />
-          <LoadMoreIndicator
-            isFetching={popular.isFetchingNextPage}
-            observerRef={popularObserver}
-          />
+      {popularSliced.length > 0 && (
+        <Section title="인기 이모지" moreHref={showMorePopular ? "/category/popular" : undefined}>
+          <EmojiGrid emojis={popularSliced} />
         </Section>
       )}
 
       {/* Recent */}
-      {recentEmojis.length > 0 && (
-        <Section title="최신 이모지">
-          <EmojiGrid emojis={recentEmojis} />
-          <LoadMoreIndicator isFetching={recent.isFetchingNextPage} observerRef={recentObserver} />
+      {recentSliced.length > 0 && (
+        <Section title="최신 이모지" moreHref={showMoreRecent ? "/category/recent" : undefined}>
+          <EmojiGrid emojis={recentSliced} />
         </Section>
       )}
 
       {/* Categories */}
       {categories.map((cat) => (
-        <CategorySection key={cat.id} categoryId={cat.id} name={cat.name} />
+        <CategorySection key={cat.id} categoryId={cat.id} name={cat.name} slug={cat.slug} />
       ))}
     </div>
   );

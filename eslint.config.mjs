@@ -120,6 +120,7 @@ const eslintConfig = defineConfig([
     "android/**",
     ".capacitor/**",
     "coverage/**",
+    "public/ffmpeg/**",
   ]),
 ]);
 

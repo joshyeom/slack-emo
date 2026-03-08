@@ -52,7 +52,7 @@ export const EmojiCard = ({ emoji, tooltipDirection = "top" }: EmojiCardProps) =
           )}
         >
           <div className="bg-popover ring-border flex flex-col items-center gap-1.5 rounded-lg px-4 py-3 shadow-lg ring-1">
-            <div className="relative h-16 w-16">
+            <div className="relative h-24 w-24">
               <Image
                 src={emoji.image_url}
                 alt={emoji.name}

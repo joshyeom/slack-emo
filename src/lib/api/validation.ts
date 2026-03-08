@@ -2,7 +2,8 @@ const EMOJI_NAME_MAX_LENGTH = 50;
 const EMOJI_NAME_PATTERN = /^[a-zA-Z0-9가-힣ㄱ-ㅎㅏ-ㅣ\s\-_]+$/;
 
 export const validateEmojiName = (name: string): string | null => {
-  const trimmed = name.trim();
+  // macOS는 한글 파일명을 NFD(자소 분리)로 전달하므로 NFC로 정규화
+  const trimmed = name.trim().normalize("NFC");
 
   if (!trimmed) {
     return "이모지 이름을 입력해주세요";

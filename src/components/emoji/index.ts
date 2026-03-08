@@ -1,3 +1,4 @@
+export * from "./CategoryEmojiView";
 export * from "./EmojiCard";
 export * from "./EmojiDashboard";
 export * from "./EmojiEmptyState";
