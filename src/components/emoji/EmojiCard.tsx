@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import Image from "next/image";
 
@@ -12,17 +12,30 @@ import { useEmojiDownload } from "@/hooks";
 
 type EmojiCardProps = {
   emoji: Emoji | PopularEmoji;
-  tooltipDirection?: "top" | "bottom";
 };
 
-export const EmojiCard = ({ emoji, tooltipDirection = "top" }: EmojiCardProps) => {
+const TOOLTIP_HEIGHT = 160; // approximate tooltip height (image 96px + padding + text)
+
+export const EmojiCard = ({ emoji }: EmojiCardProps) => {
   const { handleDownload } = useEmojiDownload(emoji);
   const [hovered, setHovered] = useState(false);
+  const [direction, setDirection] = useState<"top" | "bottom">("bottom");
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const handleMouseEnter = useCallback(() => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      setDirection(spaceBelow < TOOLTIP_HEIGHT ? "top" : "bottom");
+    }
+    setHovered(true);
+  }, []);
 
   return (
     <button
+      ref={buttonRef}
       onClick={handleDownload}
-      onMouseEnter={() => setHovered(true)}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setHovered(false)}
       className={cn(
         "group relative flex cursor-pointer items-center gap-3",
@@ -42,13 +55,13 @@ export const EmojiCard = ({ emoji, tooltipDirection = "top" }: EmojiCardProps) =
       </div>
       <span className="truncate text-sm">:{emoji.name}</span>
 
-      {/* Hover tooltip - only render image when hovered */}
+      {/* Hover tooltip - direction based on viewport position */}
       {hovered && (
         <div
           className={cn(
             "pointer-events-none absolute left-1/2 z-50 -translate-x-1/2",
             "animate-in fade-in zoom-in-95 duration-200",
-            tooltipDirection === "top" ? "bottom-full mb-2" : "top-full mt-2"
+            direction === "top" ? "bottom-full mb-2" : "top-full mt-2"
           )}
         >
           <div className="bg-popover ring-border flex flex-col items-center gap-1.5 rounded-lg px-4 py-3 shadow-lg ring-1">

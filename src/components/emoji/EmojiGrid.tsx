@@ -27,16 +27,10 @@ export const EmojiGrid = ({ emojis, className, columns = "auto" }: EmojiGridProp
     );
   }
 
-  const colCount = columns === "auto" ? 5 : columns;
-
   return (
     <div className={cn("grid gap-2", gridCols[columns], className)}>
-      {emojis.map((emoji, index) => (
-        <EmojiCard
-          key={emoji.id}
-          emoji={emoji}
-          tooltipDirection={index < colCount ? "bottom" : "top"}
-        />
+      {emojis.map((emoji) => (
+        <EmojiCard key={emoji.id} emoji={emoji} />
       ))}
     </div>
   );
