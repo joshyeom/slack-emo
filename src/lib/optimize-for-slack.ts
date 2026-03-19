@@ -1,21 +1,64 @@
+import { getFFmpeg } from "@/lib/video-to-gif";
+
 const SLACK_EMOJI_SIZE = 128;
 const SLACK_MAX_BYTES = 128 * 1024; // 128KB
 
 /**
+ * GIF를 FFmpeg로 128x128 리사이즈하고, 128KB 이하로 압축합니다.
+ * 색상 수를 단계적으로 줄여 용량을 맞춥니다.
+ */
+const optimizeGif = async (blob: Blob): Promise<Blob> => {
+  const ffmpeg = await getFFmpeg();
+
+  const origin = window.location.origin;
+  const utilUrl = `${origin}/ffmpeg/util/index.js`;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { fetchFile } = (await import(/* webpackIgnore: true */ utilUrl)) as any;
+
+  await ffmpeg.writeFile("input.gif", await fetchFile(blob));
+
+  // 색상 수를 단계적으로 줄여 128KB 이하 달성
+  for (const colors of [256, 128, 64, 32]) {
+    await ffmpeg.exec([
+      "-i",
+      "input.gif",
+      "-vf",
+      `scale=${SLACK_EMOJI_SIZE}:${SLACK_EMOJI_SIZE}:force_original_aspect_ratio=increase,crop=${SLACK_EMOJI_SIZE}:${SLACK_EMOJI_SIZE},split[s0][s1];[s0]palettegen=max_colors=${colors}[p];[s1][p]paletteuse=dither=bayer`,
+      "-loop",
+      "0",
+      "-y",
+      "output.gif",
+    ]);
+
+    const data = await ffmpeg.readFile("output.gif");
+    const optimized = new Blob([new Uint8Array(data as Uint8Array)], {
+      type: "image/gif",
+    });
+
+    if (optimized.size <= SLACK_MAX_BYTES) {
+      await ffmpeg.deleteFile("input.gif");
+      await ffmpeg.deleteFile("output.gif");
+      return optimized;
+    }
+  }
+
+  // 최소 색상으로도 초과 시 마지막 결과 반환
+  const data = await ffmpeg.readFile("output.gif");
+  await ffmpeg.deleteFile("input.gif");
+  await ffmpeg.deleteFile("output.gif");
+  return new Blob([new Uint8Array(data as Uint8Array)], { type: "image/gif" });
+};
+
+/**
  * 다운로드 시 이미지를 Slack 이모지 규격(128x128, 128KB 이하)으로 최적화합니다.
  * - PNG/JPEG/WebP: Canvas로 128x128 리사이즈 → 128KB 초과 시 quality 단계적 압축
- * - GIF: 128KB 이하면 원본, 초과 시 null 반환 (호출부에서 처리)
+ * - GIF: FFmpeg로 128x128 리사이즈 + 색상 수 조절로 128KB 이하 압축
  */
-export const optimizeForSlack = async (
-  blob: Blob
-): Promise<{ blob: Blob; extension: string; skipped?: boolean }> => {
-  // GIF는 클라이언트에서 프레임 단위 리사이즈가 어려우므로
-  // 용량만 체크하고, 초과 시 skipped 플래그로 알림
+export const optimizeForSlack = async (blob: Blob): Promise<{ blob: Blob; extension: string }> => {
+  // GIF → FFmpeg로 리사이즈 + 압축
   if (blob.type === "image/gif") {
-    if (blob.size <= SLACK_MAX_BYTES) {
-      return { blob, extension: "gif" };
-    }
-    return { blob, extension: "gif", skipped: true };
+    const optimized = await optimizeGif(blob);
+    return { blob: optimized, extension: "gif" };
   }
 
   // PNG/JPEG/WebP → 128x128 리사이즈
