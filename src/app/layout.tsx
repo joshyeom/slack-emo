@@ -44,6 +44,9 @@ export const metadata: Metadata = {
     title: "Slack Emo - Slack 커스텀 이모지 공유 플랫폼",
     description: "Slack 워크스페이스를 위한 커스텀 이모지를 찾고, 다운로드하고, 공유하세요.",
   },
+  verification: {
+    google: "jf7pPSbqLjloi6FUTeRrXCGEpiXAB5wninqUIGCNmkk",
+  },
   alternates: {
     canonical: "https://slack-emo.vercel.app",
   },
