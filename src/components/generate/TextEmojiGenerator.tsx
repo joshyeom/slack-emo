@@ -2,10 +2,16 @@
 
 import { Download, Loader2, RotateCcw } from "lucide-react";
 
-import type { GifAnimationType } from "@/lib/text-emoji-gif";
 import { canvasToPngBlob } from "@/lib/text-emoji-renderer";
 
 import { Button, Input, Label } from "@/components/ui";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { useTextEmoji } from "@/hooks/use-text-emoji";
 
@@ -23,11 +29,6 @@ const WEIGHT_OPTIONS = [
   { value: "500", label: "중간" },
   { value: "700", label: "굵게" },
   { value: "900", label: "매우 굵게" },
-] as const;
-
-const ANIMATION_OPTIONS = [
-  { value: "typing", label: "타이핑" },
-  { value: "blink", label: "깜빡임" },
 ] as const;
 
 const SPEED_OPTIONS = [
@@ -141,33 +142,41 @@ export const TextEmojiGenerator = () => {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>폰트</Label>
-          <select
+          <Select
             value={options.fontFamily}
-            onChange={(e) => updateOption("fontFamily", e.target.value)}
-            className="border-input bg-background ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+            onValueChange={(value) => updateOption("fontFamily", value)}
           >
-            {FONT_OPTIONS.map((f) => (
-              <option key={f.value} value={f.value}>
-                {f.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {FONT_OPTIONS.map((f) => (
+                <SelectItem key={f.value} value={f.value}>
+                  {f.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-2">
           <Label>굵기</Label>
-          <select
+          <Select
             value={options.fontWeight}
-            onChange={(e) =>
-              updateOption("fontWeight", e.target.value as "400" | "500" | "600" | "700" | "900")
+            onValueChange={(value) =>
+              updateOption("fontWeight", value as "400" | "500" | "600" | "700" | "900")
             }
-            className="border-input bg-background ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
           >
-            {WEIGHT_OPTIONS.map((w) => (
-              <option key={w.value} value={w.value}>
-                {w.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {WEIGHT_OPTIONS.map((w) => (
+                <SelectItem key={w.value} value={w.value}>
+                  {w.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -316,32 +325,11 @@ export const TextEmojiGenerator = () => {
         </div>
       </div>
 
-      {/* GIF 옵션 */}
+      {/* GIF 옵션 — 타이핑 속도만 */}
       {outputMode === "gif" && (
         <div className="bg-muted/50 space-y-3 rounded-lg p-4">
           <div className="space-y-2">
-            <Label>애니메이션</Label>
-            <div className="flex gap-2">
-              {ANIMATION_OPTIONS.map((anim) => (
-                <button
-                  key={anim.value}
-                  type="button"
-                  onClick={() => updateGifOption("animationType", anim.value as GifAnimationType)}
-                  className="rounded-md border px-3 py-1.5 text-sm transition-colors"
-                  style={{
-                    backgroundColor:
-                      gifOptions.animationType === anim.value ? "#3b82f6" : "transparent",
-                    color: gifOptions.animationType === anim.value ? "#ffffff" : undefined,
-                    borderColor: gifOptions.animationType === anim.value ? "#3b82f6" : undefined,
-                  }}
-                >
-                  {anim.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label>속도</Label>
+            <Label>타이핑 속도</Label>
             <div className="flex gap-2">
               {SPEED_OPTIONS.map((speed) => (
                 <button
@@ -362,7 +350,7 @@ export const TextEmojiGenerator = () => {
             </div>
           </div>
           <p className="text-muted-foreground text-xs">
-            GIF 생성 시 FFmpeg를 사용합니다. 첫 사용 시 로딩에 시간이 걸릴 수 있습니다.
+            한 글자씩 순서대로 나타나는 타이핑 애니메이션 GIF를 생성합니다.
           </p>
         </div>
       )}
