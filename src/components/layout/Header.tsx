@@ -4,7 +4,7 @@ import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
 
-import { LogOut, Moon, Search, Sun } from "lucide-react";
+import { LogOut, Moon, Search, Sun, Type } from "lucide-react";
 
 import { EmojiUploadDialog } from "@/components/emoji";
 import { useSearchContext } from "@/components/search-provider";
@@ -64,6 +64,14 @@ export const Header = () => {
               />
             </div>
           </div>
+
+          {/* Generate Button */}
+          <Link href="/generate">
+            <Button variant="ghost" size="icon" title="텍스트 이모지 만들기">
+              <Type className="h-5 w-5" />
+              <span className="sr-only">텍스트 이모지 생성</span>
+            </Button>
+          </Link>
 
           {/* Upload Button - Only for logged in users */}
           {user && <EmojiUploadDialog />}
