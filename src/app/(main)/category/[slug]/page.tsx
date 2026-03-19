@@ -20,13 +20,21 @@ export const generateMetadata = async ({ params }: Props): Promise<Metadata> => 
 
   const name = category?.name ?? slug;
   const description =
-    category?.description ?? `${name} 카테고리의 Slack 커스텀 이모지를 다운로드하세요.`;
+    category?.description ??
+    `${name} 슬랙 이모지 & 이모티콘 무료 다운로드. ${name} 카테고리의 커스텀 이모지를 Slack에 바로 추가하세요.`;
 
   return {
-    title: `${name} 이모지`,
+    title: `${name} 슬랙 이모지 무료 다운로드`,
     description,
+    keywords: [
+      `${name} 슬랙 이모지`,
+      `${name} 이모티콘`,
+      `슬랙 ${name} 이모지`,
+      "슬랙 이모지 다운로드",
+      "슬랙 커스텀 이모지",
+    ],
     openGraph: {
-      title: `${name} 이모지 | Slack Emo`,
+      title: `${name} 슬랙 이모지 | Slack Emo`,
       description,
       url: `https://slack-emo.vercel.app/category/${slug}`,
     },

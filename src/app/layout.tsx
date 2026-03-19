@@ -15,25 +15,36 @@ const notoSansKR = Noto_Sans_KR({
 
 export const metadata: Metadata = {
   title: {
-    default: "Slack Emo - Slack 커스텀 이모지 공유 플랫폼",
+    default: "Slack Emo - 슬랙 커스텀 이모지 무료 다운로드 & 공유",
     template: "%s | Slack Emo",
   },
   description:
-    "Slack 워크스페이스를 위한 커스텀 이모지를 찾고, 다운로드하고, 공유하세요. 다양한 카테고리의 이모지를 128x128 Slack 규격에 맞춰 바로 사용할 수 있습니다.",
+    "슬랙 워크스페이스를 위한 커스텀 이모지를 무료로 다운로드하세요. 귀여운, 웃긴, 업무용 이모티콘 모음을 128x128 Slack 규격에 맞춰 바로 사용할 수 있습니다. 슬랙 이모지 팩, 움짤 GIF 이모티콘까지 한곳에서.",
   keywords: [
-    "Slack",
-    "이모지",
-    "이모티콘",
-    "커스텀 이모지",
-    "Slack emoji",
     "슬랙 이모지",
     "슬랙 이모티콘",
+    "슬랙 커스텀 이모지",
+    "슬랙 이모지 다운로드",
+    "슬랙 이모지 무료",
+    "슬랙 이모지 모음",
+    "슬랙 이모지 팩",
+    "슬랙 이모지 만들기",
+    "슬랙 이모지 추가",
+    "슬랙 움짤 이모지",
+    "슬랙 GIF 이모지",
+    "슬랙 리액션 이모지",
+    "업무용 이모티콘",
+    "회사 슬랙 이모지",
+    "Slack emoji",
+    "Slack custom emoji",
+    "Slack 이모지",
   ],
   metadataBase: new URL("https://slack-emo.vercel.app"),
   manifest: "/manifest.json",
   openGraph: {
-    title: "Slack Emo - Slack 커스텀 이모지 공유 플랫폼",
-    description: "Slack 워크스페이스를 위한 커스텀 이모지를 찾고, 다운로드하고, 공유하세요.",
+    title: "Slack Emo - 슬랙 커스텀 이모지 무료 다운로드",
+    description:
+      "슬랙 이모지 & 이모티콘을 무료로 다운로드하세요. 귀여운, 웃긴, 업무용 이모지 모음.",
     type: "website",
     locale: "ko_KR",
     siteName: "Slack Emo",
@@ -41,11 +52,15 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Slack Emo - Slack 커스텀 이모지 공유 플랫폼",
-    description: "Slack 워크스페이스를 위한 커스텀 이모지를 찾고, 다운로드하고, 공유하세요.",
+    title: "Slack Emo - 슬랙 커스텀 이모지 무료 다운로드",
+    description:
+      "슬랙 이모지 & 이모티콘을 무료로 다운로드하세요. 귀여운, 웃긴, 업무용 이모지 모음.",
   },
   verification: {
     google: "jf7pPSbqLjloi6FUTeRrXCGEpiXAB5wninqUIGCNmkk",
+    other: {
+      "naver-site-verification": "5d7f23e5156ef197de37534168c6955b610b2bef",
+    },
   },
   alternates: {
     canonical: "https://slack-emo.vercel.app",
@@ -69,6 +84,26 @@ export const viewport: Viewport = {
   themeColor: "#ffffff",
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Slack Emo",
+  url: "https://slack-emo.vercel.app",
+  description: "슬랙 워크스페이스를 위한 커스텀 이모지를 무료로 다운로드하고 공유하는 플랫폼",
+  applicationCategory: "DesignApplication",
+  operatingSystem: "Web",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "KRW",
+  },
+  inLanguage: "ko",
+  author: {
+    "@type": "Organization",
+    name: "Slack Emo",
+  },
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -77,6 +112,10 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <body className={`${notoSansKR.variable} font-sans antialiased`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <QueryProvider>
           <ThemeProvider
             attribute="class"
