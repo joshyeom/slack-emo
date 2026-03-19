@@ -20,6 +20,14 @@ const getLines = (text: string): string[] => {
   return lines.length > 0 ? lines : [""];
 };
 
+/** generic 폰트는 따옴표 없이, 커스텀 폰트는 따옴표로 감싼다 */
+const GENERIC_FONTS = new Set(["serif", "sans-serif", "monospace", "cursive", "fantasy"]);
+
+const formatFontFamily = (fontFamily: string): string => {
+  if (GENERIC_FONTS.has(fontFamily)) return fontFamily;
+  return `'${fontFamily}'`;
+};
+
 /** 주어진 fontSize에서 모든 줄이 캔버스 안에 들어가는지 확인 */
 const measureFit = (
   ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
@@ -28,7 +36,7 @@ const measureFit = (
   fontWeight: string,
   fontSize: number
 ): boolean => {
-  ctx.font = `${fontWeight} ${fontSize}px '${fontFamily}', 'Noto Sans KR', sans-serif`;
+  ctx.font = `${fontWeight} ${fontSize}px ${formatFontFamily(fontFamily)}, sans-serif`;
 
   const maxWidth = Math.max(...lines.map((line) => ctx.measureText(line).width));
   const lineHeight = fontSize * 1.2;
@@ -83,7 +91,7 @@ export const renderTextEmoji = (
   // 자동 폰트 사이즈 계산 (전체 텍스트 기준으로 크기 결정)
   const fullLines = getLines(options.text);
   const fontSize = findBestFontSize(ctx, fullLines, options.fontFamily, options.fontWeight);
-  const font = `${options.fontWeight} ${fontSize}px '${options.fontFamily}', 'Noto Sans KR', sans-serif`;
+  const font = `${options.fontWeight} ${fontSize}px ${formatFontFamily(options.fontFamily)}, sans-serif`;
 
   ctx.font = font;
   ctx.textAlign = "center";

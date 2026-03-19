@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 
-import type { GifAnimationType, GifOptions } from "@/lib/text-emoji-gif";
+import type { GifOptions } from "@/lib/text-emoji-gif";
 import type { TextEmojiOptions } from "@/lib/text-emoji-renderer";
 
 type OutputMode = "png" | "gif";
@@ -18,7 +18,6 @@ const DEFAULT_OPTIONS: TextEmojiOptions = {
 };
 
 const DEFAULT_GIF_OPTIONS: GifOptions = {
-  animationType: "typing" as GifAnimationType,
   charDelay: 300,
 };
 

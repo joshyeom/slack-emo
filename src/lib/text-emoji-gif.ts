@@ -2,10 +2,7 @@ import { CANVAS_SIZE, renderTextEmoji } from "./text-emoji-renderer";
 import type { TextEmojiOptions } from "./text-emoji-renderer";
 import { getFFmpeg } from "./video-to-gif";
 
-export type GifAnimationType = "typing" | "bounce" | "fade" | "blink";
-
 export type GifOptions = {
-  animationType: GifAnimationType;
   /** 글자당 딜레이 (ms) */
   charDelay: number;
 };
@@ -29,35 +26,14 @@ const generateTypingFrames = (text: string): string[] => {
 };
 
 /**
- * 깜빡임 애니메이션: 텍스트 → 빈 화면 → 텍스트 반복
- */
-const generateBlinkFrames = (text: string): string[] => [text, "", text, "", text, text];
-
-/**
- * 프레임 텍스트 목록 생성 (애니메이션 타입별)
- */
-const generateFrameTexts = (text: string, animationType: GifAnimationType): string[] => {
-  switch (animationType) {
-    case "typing":
-      return generateTypingFrames(text);
-    case "blink":
-      return generateBlinkFrames(text);
-    case "bounce":
-    case "fade":
-    default:
-      return generateTypingFrames(text);
-  }
-};
-
-/**
- * 텍스트 이모지 → 애니메이션 GIF 생성
+ * 텍스트 이모지 → 타이핑 애니메이션 GIF 생성
  */
 export const generateTextEmojiGif = async (
   emojiOptions: TextEmojiOptions,
   gifOptions: GifOptions,
   onProgress?: (progress: number) => void
 ): Promise<Blob> => {
-  const frameTexts = generateFrameTexts(emojiOptions.text, gifOptions.animationType);
+  const frameTexts = generateTypingFrames(emojiOptions.text);
   const frameCount = frameTexts.length;
 
   onProgress?.(5);
