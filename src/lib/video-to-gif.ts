@@ -36,7 +36,7 @@ export const getVideoDuration = (file: File): Promise<number> =>
 let ffmpegInstance: any = null;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getFFmpeg = async (onProgress?: (progress: number) => void): Promise<any> => {
+export const getFFmpeg = async (onProgress?: (progress: number) => void): Promise<any> => {
   if (ffmpegInstance?.loaded) {
     if (onProgress) {
       ffmpegInstance.on("progress", ({ progress }: { progress: number }) =>

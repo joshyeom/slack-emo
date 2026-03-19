@@ -3,7 +3,6 @@
 import { useCallback, useMemo } from "react";
 
 import debounce from "lodash.debounce";
-import { toast } from "sonner";
 
 import { optimizeForSlack } from "@/lib/optimize-for-slack";
 
@@ -13,13 +12,7 @@ const downloadEmoji = async (emoji: Emoji | PopularEmoji) => {
   const response = await fetch(emoji.image_url);
   const blob = await response.blob();
 
-  const { blob: optimized, extension, skipped } = await optimizeForSlack(blob);
-
-  if (skipped) {
-    toast.warning("GIF 용량이 128KB를 초과합니다. 원본으로 다운로드됩니다.", {
-      description: "Slack 업로드 시 용량 제한에 걸릴 수 있습니다.",
-    });
-  }
+  const { blob: optimized, extension } = await optimizeForSlack(blob);
 
   const link = document.createElement("a");
   link.href = URL.createObjectURL(optimized);
